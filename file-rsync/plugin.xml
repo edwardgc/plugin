@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="FileRsyncBuilder"
+         name="FileRsync Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder hasNature="false">
+         <run class="com.nokia.filersync.builder.FileRsyncBuilder"/>
+      </builder>
+   </extension>
+   <extension
+         id="FSPropertyPage"
+         name="FileRsync property page"
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            nameFilter="*"
+            class="com.nokia.filersync.properties.ProjectSyncPropertyPage"
+            name="File Rsync"
+            id="de.loskutov.fs.properties.samplePropertyPage"/>
+   </extension>
+   <extension
+         id="FSPreferences"
+         name="FileRsync preferences"
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="com.nokia.filersync.preferences.PreferencesInitializer"/>
+   </extension>
+
+</plugin>
