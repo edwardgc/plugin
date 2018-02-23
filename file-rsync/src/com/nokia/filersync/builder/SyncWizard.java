@@ -1,19 +1,14 @@
 package com.nokia.filersync.builder;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 
-import com.nokia.filersync.FileRsyncPlugin;
 import com.nokia.filersync.command.FileMapping;
 import com.nokia.filersync.properties.ProjectProperties;
 
@@ -89,10 +84,9 @@ public class SyncWizard {
     /**
      * Performs all required operations to sync given delta with target directory
      * @param delta
-     * @param monitor
-     * @return true only if this operation was successfull for all mapped files
+     * @return true only if this operation was successful for all mapped files
      */
-    public IResource sync(IResourceDelta delta, IProgressMonitor monitor) {
+    public IResource sync(IResourceDelta delta) {
 		IResource res = delta.getResource();
 		switch (delta.getKind()) {
 		case IResourceDelta.ADDED:

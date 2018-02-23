@@ -24,8 +24,6 @@ public class CygwinBuilder {
 	private final String verboseOption = "-v ";
 	private final String statsOption = "--stats ";
 	
-	private final int MAX_INCREMENTAL_RESOURCES = 5;
-	
 	public CygwinBuilder(IRunner runner) {
 		this.runner = runner;
 	}
@@ -33,9 +31,6 @@ public class CygwinBuilder {
 	public void buildIncremental(List<IResource> resources, FileRsyncConfig config, OutputStream os) throws IOException{
 		if(resources == null || resources.size()==0) {
 			return;
-		}
-		if(resources.size() > MAX_INCREMENTAL_RESOURCES) {
-			buildFull(config, os);
 		}
 		List<String> commands = getCygwinBash(config);
 		Set<FileMapping> mappings = findFileMap(resources, config);

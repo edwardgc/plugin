@@ -44,6 +44,8 @@ implements IPreferenceChangeListener {
     public static final int MAPPING_CHANGED_IN_GUI_BUILD = 999;
 
     public static final Integer MAPPING_CHANGED_IN_GUI = new Integer(MAPPING_CHANGED_IN_GUI_BUILD);
+    
+	private final int MAX_INCREMENTAL_RESOURCES = 5;
 
     private boolean wizardNotAvailable;
 
@@ -158,98 +160,60 @@ implements IPreferenceChangeListener {
      * @param monitor progress indicator
      * @return IProject[] related projects list
      */
-    private IProject[] buildIncremental(final Map<String,String> args, final ProjectProperties props,
-            final SyncWizard wizard, final IProgressMonitor monitor) {
-        IProject result[] = null;
+	private IProject[] buildIncremental(final Map<String, String> args, final ProjectProperties props,
+			final SyncWizard wizard, final IProgressMonitor monitor) {
+		IProject result[] = null;
 
-        final IProject currentProject = getProjectInternal();
-        if (currentProject != null) {
-            final IResourceDelta resourceDelta = getDelta(currentProject);
-            if (resourceDelta == null) {
-                /*
-                 * Builder deltas may be null. If a builder has never been invoked before,
-                 * any request for deltas will return null. Also, if a builder is not run
-                 *  for a long time, the platform reserves the right to return a null delta
-                 */
-                return buildFull(args, props, wizard, monitor);
-            }
-            if (resourceDelta.getAffectedChildren().length == 0) {
-                FileRsyncPlugin.log("nothing happens because delta is empty", null, IStatus.INFO);
-            } else {
-                /*
-                 * check if my own props file is changed - before going to
-                 * synchronize all other files
-                 */
-                FSPropsChecker propsChecker = new FSPropsChecker(monitor, props);
-                try {
-                    resourceDelta.accept(propsChecker, false);
-                } catch (CoreException e) {
-                    FileRsyncPlugin.log("Errors during sync of the resource delta:"
-                            + resourceDelta + " for project '" + currentProject.getName()
-                            + "'", e, IStatus.ERROR);
-                }
-                // props are in-sync now
-                wizard.setProjectProps(props);
-                int elementCount = CountVisitor.countDeltaElement(resourceDelta, getVisitorFlags());
+		final IProject currentProject = getProjectInternal();
+		if (currentProject != null) {
+			final IResourceDelta resourceDelta = getDelta(currentProject);
+			if (resourceDelta == null) {
+				return buildFull(args, props, wizard, monitor);
+			}
+			if (resourceDelta.getAffectedChildren().length == 0) {
+				FileRsyncPlugin.log("nothing happens because delta is empty", null, IStatus.INFO);
+			} else {
+				FSPropsChecker propsChecker = new FSPropsChecker(monitor, props);
+				try {
+					resourceDelta.accept(propsChecker, false);
+				} catch (CoreException e) {
+					FileRsyncPlugin.log("Errors during sync of the resource delta:" + resourceDelta + " for project '"
+							+ currentProject.getName() + "'", e, IStatus.ERROR);
+				}
+				wizard.setProjectProps(props);
 
-                if (propsChecker.propsChanged) {
-                    Job[] jobs = Job.getJobManager().find(FileRsyncBuilder.class);
-                    if (jobs.length == 0) {
-                        // start full build (not clean!) because properties are changed!!!
-                        Job job = new Job("Filersync") {
-                            @Override
-                            public boolean belongsTo(Object family) {
-                                return family == FileRsyncBuilder.class;
-                            }
+				OutputStream os = null;
+				try {
+					final FSDeltaVisitor visitor = new FSDeltaVisitor(wizard);
+					resourceDelta.accept(visitor, getVisitorFlags());
+					List<IResource> resources = visitor.getAffectedResources();
+					os = FileRsyncPlugin.getConsoleStream();
 
-                            @Override
-                            protected IStatus run(IProgressMonitor monitor1) {
-                                build(FULL_BUILD, monitor1);
-                                return Status.OK_STATUS;
-                            }
-                        };
-                        /*
-                         * we starting the full build intensionally asynchron, because the current
-                         * build need to be finished first. The background is not completely clear for
-                         * me, but interrupting the build here lead to failures of "delete"
-                         * test case, if variables files are deleted too.
-                         * So let the current build finish and shedule another one to do
-                         * the full sync again, with changed preferences
-                         */
-                        job.setUser(false);
-                        job.schedule(1000);
-                    }
-                } else {
-                	OutputStream os = null;
-                    try {
-                    	os = FileRsyncPlugin.getConsoleStream();
-                        monitor.beginTask("Incremental file sync", elementCount);
-                        final FSDeltaVisitor visitor = new FSDeltaVisitor(monitor, wizard);
-                        resourceDelta.accept(visitor, getVisitorFlags());
-                        List<IResource> resources = visitor.getAffectedResources();
-                        builder.buildIncremental(resources, activeConfig, os);
-                    } catch (CoreException e) {
-                        FileRsyncPlugin.log(
-                                "Errors during sync of the resource delta:"
-                                        + resourceDelta + " for project '"
-                                        + currentProject + "'", e, IStatus.ERROR);
-					} catch (IOException e) {
-						FileRsyncPlugin.log(e.getMessage(), e, IStatus.ERROR);
-					} finally {
-						wizard.cleanUp(monitor);
-						monitor.done();
-						if(os!=null) {
-							try {
-								os.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+					if (propsChecker.propsChanged || resources.size() > MAX_INCREMENTAL_RESOURCES) {
+						monitor.beginTask("Full file sync", 1);
+						builder.buildFull(activeConfig, os);
+					} else {
+						monitor.beginTask("Incremental file sync", 1);
+						builder.buildIncremental(resources, activeConfig, os);
+					}
+				} catch (CoreException e) {
+					FileRsyncPlugin.log("Errors during sync of the resource delta:" + resourceDelta + " for project '"
+							+ currentProject + "'", e, IStatus.ERROR);
+				} catch (IOException e) {
+					FileRsyncPlugin.log(e.getMessage(), e, IStatus.ERROR);
+				} finally {
+					wizard.cleanUp(monitor);
+					monitor.done();
+					if (os != null) {
+						try {
+							os.close();
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
 					}
-                }
-            }
-        }
-
+				}
+			}
+		}
         return result;
     }
 
@@ -263,11 +227,6 @@ implements IPreferenceChangeListener {
             ProjectProperties props, SyncWizard wizard, final IProgressMonitor monitor) {
 
         if (!args.containsKey(MAPPING_CHANGED_IN_GUI.toString()) && wizard.getProjectProps() == null) {
-            /*
-             * check if my own props file is changed - before going to
-             * synchronize all other files, but only if the build was *not*
-             * initiated by changing mapping in the GUI
-             */
             FSPropsChecker propsChecker = new FSPropsChecker(monitor, props);
             try {
                 project.accept(propsChecker, IResource.DEPTH_INFINITE, false);
@@ -276,7 +235,6 @@ implements IPreferenceChangeListener {
                         e, IStatus.ERROR);
             }
         }
-        // props are in-sync now
         wizard.setProjectProps(props);
 
 		OutputStream os = null;
@@ -321,31 +279,20 @@ implements IPreferenceChangeListener {
         return changed;
     }
 
-    protected void checkCancel(IProgressMonitor monitor, SyncWizard wizard) {
-        if (monitor.isCanceled()) {
-            wizard.cleanUp(monitor);
-            throw new OperationCanceledException();
-        }
-    }
-
     private class FSDeltaVisitor implements IResourceDeltaVisitor {
-        private IProgressMonitor monitor;
         private SyncWizard wizard;
         private List<IResource> affectedResources = new ArrayList<IResource>(); 
 
-        public FSDeltaVisitor(IProgressMonitor monitor, SyncWizard wizard) {
-            this.monitor = monitor;
+        public FSDeltaVisitor(SyncWizard wizard) {
             this.wizard = wizard;
         }
 
         @Override
         public boolean visit(IResourceDelta delta) {
-            if (delta == null) {
+            if (delta == null || affectedResources.size() > MAX_INCREMENTAL_RESOURCES) {
                 return false;
             }
-            checkCancel(monitor, wizard);
-            monitor.worked(1);
-            if(isResourceInclude(affectedResources, delta.getResource()))
+            if(isResourceIncluded(affectedResources, delta.getResource()))
             	return true;
             if (delta.getResource().getType() == IResource.PROJECT) {
                 return true;
@@ -356,9 +303,7 @@ implements IPreferenceChangeListener {
             	if(delta.getAffectedChildren().length>0) return true; //continue visit children
                 return wizard.hasMappedChildren(delta);
             }
-            String resStr = delta.getResource().toString();
-            monitor.subTask("sync: " + resStr);
-            IResource rt = wizard.sync(delta, monitor);
+            IResource rt = wizard.sync(delta);
             if(rt != null)
             	affectedResources.add(rt);
             return true;
@@ -457,6 +402,8 @@ implements IPreferenceChangeListener {
 
                 @Override
                 public IStatus run(IProgressMonitor monitor) {
+                	ProjectProperties props = ProjectProperties.getInstance(getProjectInternal());
+                    activeConfig = props.getSavedConfig(); 
                     build(MAPPING_CHANGED_IN_GUI_BUILD, monitor);
                     return Status.OK_STATUS;//new JobStatus(IStatus.INFO, 0, this, "", null);
                 }
@@ -466,7 +413,7 @@ implements IPreferenceChangeListener {
         }
     }
     
-    boolean isResourceInclude(List<IResource> resources, IResource newResource) {
+    boolean isResourceIncluded(List<IResource> resources, IResource newResource) {
     	for(IResource res : resources) {
     		if(res.getProjectRelativePath().equals(newResource.getProjectRelativePath())) {
     			return true;

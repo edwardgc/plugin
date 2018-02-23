@@ -853,7 +853,7 @@ IStatusChangeListener {
         ProjectProperties properties = ProjectProperties.getInstance(project);
         boolean wasDisabled = true;
         if(forceSync){
-            List listeners = properties.getProjectPreferenceChangeListeners();
+            List<IPreferenceChangeListener> listeners = properties.getProjectPreferenceChangeListeners();
             for (int i = 0; i < listeners.size(); i++) {
                 FileRsyncBuilder b = (FileRsyncBuilder) listeners.get(i);
                 wasDisabled = b.isDisabled();
@@ -864,7 +864,7 @@ IStatusChangeListener {
         }
         IEclipsePreferences preferences = properties.getPreferences(forceSync);
         if(forceSync){
-            List listeners = properties.getProjectPreferenceChangeListeners();
+            List<IPreferenceChangeListener> listeners = properties.getProjectPreferenceChangeListeners();
             for (int i = 0; i < listeners.size(); i++) {
                 FileRsyncBuilder b = (FileRsyncBuilder) listeners.get(i);
                 if(!wasDisabled) {
