@@ -55,7 +55,12 @@ public class CygwinBuilder {
 	public void run(List<String> commands, OutputStream os) throws IOException{
 		PrintWriter pw = new PrintWriter(os, true);
 		pw.println(commands.toString());
-		runner.run(commands, os);
+		try {
+			runner.run(commands, os);
+		} catch(IOException e) {
+			pw.println(e.getMessage());
+		}
+		pw.println();
 		os.flush();
 	}
 

@@ -1,5 +1,6 @@
 package com.nokia.filersync.properties;
 
+import java.io.File;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -941,10 +942,8 @@ IStatusChangeListener {
     }
 
     void dialogFieldChanged(DialogField field) {
-    	if(field == foldersList) {
-	        updateTargetDirectoryStatus();
-	        doStatusLineUpdate();
-    	}
+        updateTargetDirectoryStatus();
+        doStatusLineUpdate();
     }
 
     private void doStatusLineUpdate() {
@@ -958,6 +957,18 @@ IStatusChangeListener {
     		destFolderStatus.setError("Please specify target directory!");
             return;
         }
+    	if(cygwinHomeField.getText().isEmpty()) {
+    		destFolderStatus.setError("Please specify Cygwin Home Directory!");
+            return;
+    	}
+    	if(targetHostField.getText().isEmpty()) {
+    		destFolderStatus.setError("Please specify Target Host!");
+            return;
+    	}
+    	if(targetUsernameField.getText().isEmpty()) {
+    		destFolderStatus.setError("Please specify Username on Target Host!");
+            return;
+    	}
         destFolderStatus.setOK();
     }
     
