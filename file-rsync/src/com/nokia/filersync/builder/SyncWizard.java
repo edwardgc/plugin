@@ -31,8 +31,8 @@ public class SyncWizard {
         projectProps = props;
         mappings = props.getMappings();
         if (mappings == null || mappings.size() == 0) {
-            throw new IllegalArgumentException("FileRsync mapping is missing."
-                    + " Don't panic, simply call your project owner.");
+            throw new IllegalArgumentException("FileRsync synchronization mapping is missing. "
+                    + "Please add it in File Rsync setting page.");
         }
     }
 

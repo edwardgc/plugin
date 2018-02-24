@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.internal.dtree.DeltaDataTree;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -56,6 +57,8 @@ implements IPreferenceChangeListener {
     private FileRsyncConfig activeConfig;
 
     volatile boolean ignorePrefChange;
+    
+    private boolean configChangedBeforeInit;
 
     private CygwinBuilder builder = new CygwinBuilder(new CommandRunner());
     
@@ -99,8 +102,13 @@ implements IPreferenceChangeListener {
             args = new HashMap<String,String>();
         }
         ProjectProperties props = ProjectProperties.getInstance(getProjectInternal());
-
         SyncWizard wizard = new SyncWizard();
+        
+        if(configChangedBeforeInit) {
+        	configChangedBeforeInit = false;
+        	return buildFull(args, props, wizard, monitor);
+        }
+
         IProject[] result = null;
         try {
             switch (kind) {
@@ -180,7 +188,12 @@ implements IPreferenceChangeListener {
 					FileRsyncPlugin.log("Errors during sync of the resource delta:" + resourceDelta + " for project '"
 							+ currentProject.getName() + "'", e, IStatus.ERROR);
 				}
-				wizard.setProjectProps(props);
+		        try {
+		        	wizard.setProjectProps(props);
+		        }catch(IllegalArgumentException e) {
+		        	FileRsyncPlugin.log(e.getMessage(), e, IStatus.ERROR);
+		        	return result;
+		        }
 
 				OutputStream os = null;
 				try {
@@ -235,7 +248,12 @@ implements IPreferenceChangeListener {
                         e, IStatus.ERROR);
             }
         }
-        wizard.setProjectProps(props);
+        try {
+        	wizard.setProjectProps(props);
+        }catch(IllegalArgumentException e) {
+        	FileRsyncPlugin.log(e.getMessage(), e, IStatus.ERROR);
+        	return;
+        }
 
 		OutputStream os = null;
 		try {
@@ -262,6 +280,7 @@ implements IPreferenceChangeListener {
         checkSettingsTimestamp(getProject().getFile(SETTINGS_PATH));
         ProjectProperties props = ProjectProperties.getInstance(getProjectInternal());
         props.addPreferenceChangeListener(this);
+        configChangedBeforeInit = props.isConfigOutOfSync();
         activeConfig = props.getSavedConfig();
     }
 

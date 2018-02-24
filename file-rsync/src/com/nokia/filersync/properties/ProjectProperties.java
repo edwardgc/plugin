@@ -47,6 +47,8 @@ public class ProjectProperties implements IPreferenceChangeListener, INodeChange
     private boolean rebuildPathMap;
 
     private List<FileMapping> mappings;
+    
+    private boolean configOutOfSync = false;
 
     private static Map<IProject, ProjectProperties> projectsToProps = 
     		new HashMap<IProject, ProjectProperties>();
@@ -336,11 +338,20 @@ public class ProjectProperties implements IPreferenceChangeListener, INodeChange
     	config.setCygwinHome(preferences.get(KEY_CYGWIN_HOME, ""));
     	config.setTargetHost(preferences.get(KEY_TARGET_HOST, ""));
     	config.setTargetUsername(preferences.get(KEY_TARGET_USERNAME, ""));
+    	configOutOfSync = false;
     	return config;
+    }
+    
+    /*
+     * Identify configuration has been updated before builder initialized
+     */
+    public boolean isConfigOutOfSync() {
+    	return configOutOfSync;
     }
     
     public boolean saveConfig(FileRsyncConfig config) {
     	setIgnorePreferenceListeners(true);
+    	configOutOfSync = true;
     	
     	try {
             preferences.clear();

@@ -101,7 +101,7 @@ IStatusChangeListener {
     protected StringDialogField targetUsernameField;
 
     private SelectionButtonDialogField enableFileRsyncField;
-
+    
     protected static Composite createContainer(Composite parent) {
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout();
@@ -895,7 +895,11 @@ IStatusChangeListener {
 
     protected void updateUI() {
         init();
-        updateTargetDirectoryStatus();
+        if(enableFileRsyncField.isSelected()) {
+        	updateTargetDirectoryStatus();
+        } else {
+        	destFolderStatus.setOK();
+        }
         doStatusLineUpdate();
     }
 
