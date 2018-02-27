@@ -48,7 +48,7 @@ public class PathListElement {
         fPath = fPath.append(mapping.getSourcePath());
 
         fChildren = new ArrayList<PathListElementAttribute>();
-        fResource = project.getFolder(fPath);
+        fResource = project.getFolder(mapping.getSourcePath());
         cachedMapping = mapping;
         createAttributeElement(INCLUSION, mapping.getInclusionPatterns());
         createAttributeElement(EXCLUSION, mapping.getExclusionPatterns());

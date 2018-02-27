@@ -220,6 +220,7 @@ public class ProjectProperties implements IPreferenceChangeListener, INodeChange
         this.ignorePreferenceListeners = true;
         try {
             preferences.clear();
+            preferences.sync();
             buildPathMap(preferences);
         } catch (BackingStoreException e) {
             FileRsyncPlugin.log("Could not sync to preferences for project:" + project, e,
@@ -354,7 +355,6 @@ public class ProjectProperties implements IPreferenceChangeListener, INodeChange
     	
     	try {
             preferences.clear();
-            refreshPreferences();
         } catch (BackingStoreException e) {
             FileRsyncPlugin.log("Cannot clear preferences for project '"
                     + project.getName() + "'", e, IStatus.ERROR);
