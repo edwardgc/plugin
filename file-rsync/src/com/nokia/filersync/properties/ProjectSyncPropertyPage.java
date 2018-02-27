@@ -454,7 +454,7 @@ IStatusChangeListener {
             InputDialog dialog = new InputDialog(getShell(), "Target directory", "Target directory", strPath.toString(), null);
             if (dialog.open() == Window.OK) {
                 elem.getParent().setAttribute(PathListElement.DESTINATION,
-                        new Path(dialog.getValue()), "");
+                        new Path(dialog.getValue().trim()), "");
                 foldersList.refresh();
             }
             dialogFieldChanged(foldersList);
@@ -961,15 +961,15 @@ IStatusChangeListener {
     		destFolderStatus.setError("Please specify target directory!");
             return;
         }
-    	if(cygwinHomeField.getText().isEmpty()) {
+    	if(cygwinHomeField.getText().trim().isEmpty()) {
     		destFolderStatus.setError("Please specify Cygwin Home Directory!");
             return;
     	}
-    	if(targetHostField.getText().isEmpty()) {
+    	if(targetHostField.getText().trim().isEmpty()) {
     		destFolderStatus.setError("Please specify Target Host!");
             return;
     	}
-    	if(targetUsernameField.getText().isEmpty()) {
+    	if(targetUsernameField.getText().trim().isEmpty()) {
     		destFolderStatus.setError("Please specify Username on Target Host!");
             return;
     	}
@@ -977,9 +977,9 @@ IStatusChangeListener {
     }
     
     protected boolean validateTargetDirectory() {
-        if (mappingList == null) {
-            return true;
-        }
+    	if(mappingList == null) {
+    		return true;
+    	}
         for (int i = 0; i < mappingList.size(); i++) {
             PathListElement cpe = (PathListElement) mappingList.get(i);
             Object dest = cpe.getAttribute(PathListElement.DESTINATION);
@@ -1061,9 +1061,9 @@ IStatusChangeListener {
     	config.setMappings(getFileMappings());
     	config.setExludeTeamFiles(exludeTeamFilesField.isSelected());
     	config.setSkipNewerFiles(skipNewerFilesField.isSelected());
-    	config.setCygwinHome(cygwinHomeField.getText());
-    	config.setTargetHost(targetHostField.getText());
-    	config.setTargetUsername(targetUsernameField.getText());
+    	config.setCygwinHome(cygwinHomeField.getText().trim());
+    	config.setTargetHost(targetHostField.getText().trim());
+    	config.setTargetUsername(targetUsernameField.getText().trim());
     	return config;
     } 
 }
