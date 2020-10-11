@@ -42,8 +42,8 @@ public class CygwinBuilder {
 	}
 	
 	public void buildFull(FileRsyncConfig config, OutputStream os) throws IOException{
-		List<String> commands = getCygwinBash(config);
 		for(FileMapping mapping : config.getMappings()) {
+			List<String> commands = getCygwinBash(config);
 			commands.add(getRsyncHead(config, mapping) + statsOption +
 					     getFullBuildFilesOption(mapping) + 
 					     getRsyncTail(config, mapping));
