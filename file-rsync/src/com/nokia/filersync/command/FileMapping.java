@@ -1,11 +1,7 @@
 package com.nokia.filersync.command;
 
-import java.io.File;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;

@@ -8,11 +8,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.internal.win32.GESTURECONFIG;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -104,7 +102,7 @@ public class FileRsyncPlugin extends AbstractUIPlugin {
     }
 
     public static Shell getShell() {
-        return getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
+        return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
     }
 
     /**

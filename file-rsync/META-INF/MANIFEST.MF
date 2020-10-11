@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: File Rsync
 Bundle-SymbolicName: com.nokia.filersync;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.1.0
 Bundle-Activator: com.nokia.filersync.FileRsyncPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -11,10 +11,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.net,
  org.eclipse.core.variables,
  org.eclipse.ui.console
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.nokia.filersync.builder,
+Export-Package: com.nokia.filersync,
+ com.nokia.filersync.builder,
  com.nokia.filersync.command,
  com.nokia.filersync.dialogs,
  com.nokia.filersync.preferences,
  com.nokia.filersync.properties
+Automatic-Module-Name: com.nokia.filersync

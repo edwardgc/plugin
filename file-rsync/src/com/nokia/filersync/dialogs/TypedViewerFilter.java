@@ -16,7 +16,7 @@ public class TypedViewerFilter extends ViewerFilter {
      * Creates a filter that only allows elements of gives types.
      * @param acceptedTypes The types of accepted elements
      */
-    public TypedViewerFilter(Class[] acceptedTypes) {
+    public TypedViewerFilter(Class<?>[] acceptedTypes) {
         this(acceptedTypes, null);
     }
 
@@ -27,7 +27,7 @@ public class TypedViewerFilter extends ViewerFilter {
      * @param rejectedElements Element equals to the rejected elements are
      * filtered out
      */
-    public TypedViewerFilter(Class[] acceptedTypes, Object[] rejectedElements) {
+    public TypedViewerFilter(Class<?>[] acceptedTypes, Object[] rejectedElements) {
         Assert.isNotNull(acceptedTypes);
         fAcceptedTypes= acceptedTypes;
         fRejectedElements= rejectedElements;

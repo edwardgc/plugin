@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.internal.ide.dialogs.RelativePathVariableGroup;
 
 import com.nokia.filersync.command.FileMapping;
 import com.nokia.filersync.properties.FileRsyncConfig;

@@ -1,10 +1,10 @@
 package com.nokia.filersync.properties;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import com.nokia.filersync.FileRsyncPlugin;
@@ -113,7 +113,7 @@ public class PathListLabelProvider extends LabelProvider {
             } else {
                 key = ISharedImages.IMG_OBJ_FOLDER;
             }
-            return FileRsyncPlugin.getDefault().getWorkbench().getSharedImages().getImage(key);
+            return PlatformUI.getWorkbench().getSharedImages().getImage(key);
         } else if (element instanceof PathListElementAttribute) {
             String key = ((PathListElementAttribute) element).getKey();
             if (key.equals(PathListElement.DESTINATION)) {
