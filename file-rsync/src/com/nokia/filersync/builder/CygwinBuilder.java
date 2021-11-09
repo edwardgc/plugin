@@ -73,7 +73,7 @@ public class CygwinBuilder {
 	
 	private String getRsyncHead(FileRsyncConfig config, FileMapping mapping) {
 		String command = "cd " + mapping.getSourceLocaiton() + "; ";
-		command += "rsync -taz --delete ";
+		command += "rsync -trz --delete ";
 		if(config.isExludeTeamFiles()) {
 			command += "-C ";
 		}
