@@ -105,6 +105,9 @@ public class CygwinBuilder {
 		String command = "";
 		IPath[] includes = mapping.getInclusionPatterns();
 		IPath[] excludes = mapping.getExclusionPatterns();
+		for(IPath exclude : excludes) {
+			command += "--exclude=" + exclude + blank;
+		}
 		if(includes.length > 0) {
 			command += "--include=*/ ";
 			for(IPath include : includes) {
@@ -113,9 +116,6 @@ public class CygwinBuilder {
 			if(excludes.length==0) {
 				command += "--exclude=* ";
 			}
-		}
-		for(IPath exclude : excludes) {
-			command += "--exclude=" + exclude + blank;
 		}
 		return command;
 	}
